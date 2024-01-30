@@ -1,0 +1,94 @@
+#include "stdio.h"
+#include "stdint.h"
+#include "uid.h"
+#include "main.h"
+#include "usart.h"
+#include "gpio.h"
+
+#define STM32F4xx 
+
+#ifdef STM32F0xx
+	Base_addr=0x1FFFF7AC;  /*STM32F0 Unique id Start address*/
+#endif
+
+#ifdef STM32F1xx
+	Base_addr=0x1FFFF7E8;  /*STM32F1 Unique id Start address*/
+#endif
+
+#ifdef STM32F2xx
+	Base_addr=0x1FFF7A10; /*STM32F2 Unique id Start address*/
+#endif
+
+#ifdef STM32F3xx
+	Base_addr=0x1FFFF7AC;  /*STM32F3 Unique id Start address*/
+#endif
+
+#ifdef STM32F4xx
+	Base_addr=0x1FFF7A10; /*stm32F4 Unique id Start address*/
+#endif
+
+#ifdef STM32F7xx
+	Base_addr=0x1FF0F420; /*STM32F7 Unique id Start address*/
+#endif
+
+ #ifdef STM32L0xx 
+	Base_addr= 0x1FF80050; /*STM32L0 Unique id Start address*/
+#endif
+
+#ifdef STM32L1xx
+	Base_addr=0x1FF80050; /*STM32L1 Unique id Start address*/
+#endif
+
+#ifdef STM32L4xx
+	Base_addr=0x1FFF7590; /*STM32L4 Unique id Start address*/
+#endif
+
+#ifdef STM32H7xx
+	Base_addr=0x1FF0F420;  /*STM32H7 Unique id Start address*/
+#endif
+
+
+//Method One: 32-bit reading
+void GetUid(void)
+{
+   uint32_t ChipUid[3] = {0};
+	 ChipUid[0]=*(uint32_t*)(Base_addr);
+	 ChipUid[1]=*(uint32_t*)(Base_addr+4);
+	 ChipUid[2]=*(uint32_t*)(Base_addr+8);
+	 printf("\r\nSTM32 Chip Uid: %08X-%08X-%08X\r\n",ChipUid[0],ChipUid[1],ChipUid[2]);
+}
+
+/*
+//Method two:8-bit reading
+#define STM32_UID_SIZE 12          
+u8 stm32_uid[STM32_UID_SIZE] = {0};
+u8* GetUid(void)                   
+{   
+    for(u8 i = 0; i < STM32_UID_SIZE; ++i)
+    {
+        u8 id= *Base_addr;
+        stm32_uid[i] = id;
+        ++Base_addr;
+    }
+    return stm32_uid;
+ }
+*/
+
+
+int fputc(int ch, FILE *f)
+{
+  HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xffff);
+  return ch;
+}
+
+int main(void)
+{
+  HAL_Init();
+  SystemClock_Config();
+  MX_GPIO_Init();
+  MX_USART1_UART_Init();
+  while (1)
+  {
+  GetUid();
+  }
+}
